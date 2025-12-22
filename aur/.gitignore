@@ -1,0 +1,13 @@
+pkg/
+src/
+*.pkg.tar.zst
+*.pkg.tar.xz
+*.tar.gz
+
+# Copied from parent during build
+setup.go
+numr.css
+item_numr.xml
+configure-theme.sh
+configure-walker.sh
+README.md

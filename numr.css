@@ -1,0 +1,49 @@
+/* Numr Calculator styles for Walker */
+
+.numr-item {
+  padding: 10px 16px;
+  margin-bottom: 1rem;
+}
+
+.numr-result-column {
+  padding-right: 16px;
+}
+
+.numr-result {
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+}
+
+.numr-separator {
+  background: alpha(@text, 0.15);
+  min-width: 1px;
+  margin: 4px 0;
+}
+
+.numr-info-column {
+  padding-left: 16px;
+  min-width: 120px;
+}
+
+.numr-info {
+  font-size: 11px;
+  min-height: 14px;
+  min-width: 100px;
+  color: alpha(@text, 0.6);
+  font-weight: 400;
+}
+
+child:selected .numr-item {
+  background: alpha(@text, 0.08);
+}
+
+child:selected .numr-separator {
+  background: alpha(@text, 0.2);
+}
+
+/* Type-specific styling - thinner font for currency/units */
+.currency .numr-result,
+.unit .numr-result {
+  font-weight: 300;
+}

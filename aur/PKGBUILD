@@ -1,0 +1,60 @@
+# Maintainer: nasedkinpv
+# NOTE: pkgver must match elephant version (Go plugins require exact version match)
+# When elephant updates, this package must be rebuilt with matching version
+
+pkgname=elephant-numr
+pkgver=2.17.2
+pkgrel=1
+pkgdesc='numr calculator provider for elephant (Walker launcher)'
+url='https://github.com/nasedkinpv/numr'
+arch=('x86_64' 'aarch64')
+license=('MIT')
+depends=("elephant=${pkgver}" 'numr')
+makedepends=('go')
+options=(!debug)
+install=elephant-numr.install
+
+_elephant_ver=${pkgver}
+source=(
+    "elephant-${_elephant_ver}.tar.gz::https://github.com/abenz1267/elephant/archive/refs/tags/v${_elephant_ver}.tar.gz"
+    "setup.go"
+    "README.md"
+    "item_numr.xml"
+    "numr.css"
+    "configure-walker.sh"
+    "configure-theme.sh"
+)
+sha256sums=(
+    'SKIP'
+    'SKIP'
+    'SKIP'
+    'SKIP'
+    'SKIP'
+    'SKIP'
+    'SKIP'
+)
+
+prepare() {
+    mkdir -p "elephant-${_elephant_ver}/internal/providers/numr"
+    cp setup.go "elephant-${_elephant_ver}/internal/providers/numr/"
+    cp README.md "elephant-${_elephant_ver}/internal/providers/numr/"
+}
+
+build() {
+    cd "elephant-${_elephant_ver}/internal/providers/numr"
+    go build -buildvcs=false -buildmode=plugin -trimpath -o numr.so
+}
+
+package() {
+    # Plugin
+    install -Dm 755 "elephant-${_elephant_ver}/internal/providers/numr/numr.so" \
+        "${pkgdir}/usr/lib/elephant/numr.so"
+
+    # Walker theme files
+    install -Dm 644 item_numr.xml "${pkgdir}/usr/share/elephant/numr/item_numr.xml"
+    install -Dm 644 numr.css "${pkgdir}/usr/share/elephant/numr/numr.css"
+
+    # Configure scripts
+    install -Dm 755 configure-walker.sh "${pkgdir}/usr/share/elephant/numr/configure-walker.sh"
+    install -Dm 755 configure-theme.sh "${pkgdir}/usr/share/elephant/numr/configure-theme.sh"
+}

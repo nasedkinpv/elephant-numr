@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  aur:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy source files to aur/
+        run: |
+          cp setup.go numr.css item_numr.xml README.md \
+             configure-walker.sh configure-theme.sh aur/
+
+      - name: Generate .SRCINFO
+        uses: docker://archlinux:latest
+        with:
+          entrypoint: bash
+          args: |
+            -c "
+            pacman -Sy --noconfirm base-devel &&
+            useradd -m builder &&
+            chown -R builder:builder aur &&
+            cd aur &&
+            su builder -c 'makepkg --printsrcinfo > .SRCINFO'
+            "
+
+      - name: Publish to AUR
+        uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
+        with:
+          pkgname: elephant-numr
+          pkgbuild: ./aur/PKGBUILD
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: "Update elephant-numr"
+          assets: |
+            ./aur/.SRCINFO
+            ./aur/setup.go
+            ./aur/README.md
+            ./aur/item_numr.xml
+            ./aur/numr.css
+            ./aur/configure-walker.sh
+            ./aur/configure-theme.sh
