@@ -11,14 +11,6 @@
 
 ## Installation
 
-### Arch Linux (AUR)
-
-```bash
-yay -S elephant-numr
-```
-
-### Manual
-
 ```bash
 git clone https://github.com/nasedkinpv/elephant-numr
 cd elephant-numr
