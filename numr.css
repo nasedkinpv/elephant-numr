@@ -5,35 +5,37 @@
   margin-bottom: 1rem;
 }
 
-.numr-result-column {
+/* Left column: Expression */
+.numr-expr-column {
   padding-right: 16px;
 }
 
-.numr-result {
-  font-size: 26px;
-  font-weight: 500;
-  letter-spacing: -0.5px;
+.numr-expr {
+  font-size: 14px;
+  font-weight: 400;
+  color: alpha(@text, 0.7);
 }
 
+/* Separator */
 .numr-separator {
   background: alpha(@text, 0.15);
   min-width: 1px;
   margin: 4px 0;
 }
 
-.numr-info-column {
+/* Right column: Result */
+.numr-result-column {
   padding-left: 16px;
-  min-width: 120px;
+  min-width: 140px;
 }
 
-.numr-info {
-  font-size: 11px;
-  min-height: 14px;
-  min-width: 100px;
-  color: alpha(@text, 0.6);
-  font-weight: 400;
+.numr-result {
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
 }
 
+/* Selection states */
 child:selected .numr-item {
   background: alpha(@text, 0.08);
 }
@@ -42,8 +44,6 @@ child:selected .numr-separator {
   background: alpha(@text, 0.2);
 }
 
-/* Type-specific styling - thinner font for currency/units */
-.currency .numr-result,
-.unit .numr-result {
-  font-weight: 300;
+child:selected .numr-expr {
+  color: alpha(@text, 0.85);
 }

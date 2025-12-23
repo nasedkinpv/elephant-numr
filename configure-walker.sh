@@ -28,7 +28,8 @@ echo "Backup created: $BACKUP"
 
 NUMR_CONFIG='numr = [
   { action = "copy", default = true },
-  { action = "refresh", label = "refresh rates", bind = "ctrl r", after = "AsyncReload" }
+  { action = "refresh", label = "refresh rates", bind = "ctrl r", after = "AsyncReload" },
+  { action = "append", label = "save to numr", bind = "shift Return" }
 ]'
 
 # Check if [providers.actions] section exists

@@ -77,6 +77,7 @@ var readme string
 const (
 	ActionCopy    = "copy"
 	ActionRefresh = "refresh"
+	ActionAppend  = "append"
 )
 
 type Config struct {
@@ -274,50 +275,49 @@ func evalNumr(query string) (*NumrResult, error) {
 	return &resp.Result, nil
 }
 
+// buildResultItem creates a QueryResponse_Item from a numr result
+func buildResultItem(query string, result *NumrResult) *pb.QueryResponse_Item {
+	resultDisplay := result.Display
+	state := []string{result.Type}
+
+	// Format result with unit/currency
+	if result.Unit != "" && result.Value != "" {
+		resultDisplay = fmt.Sprintf("%s %s", result.Value, result.Unit)
+	}
+
+	// For currency, add rates info under expression
+	exprDisplay := query
+	if result.Type == "currency" {
+		if ratesInfo := getRatesUpdateTime(); ratesInfo != "" {
+			exprDisplay = fmt.Sprintf("%s\n%s", query, ratesInfo)
+		}
+	}
+
+	return &pb.QueryResponse_Item{
+		Identifier: "numr-calc-result",
+		Text:       exprDisplay,
+		Icon:       config.Icon,
+		Subtext:    resultDisplay,
+		Provider:   Name,
+		Score:      1000,
+		Type:       pb.QueryResponse_REGULAR,
+		Actions:    []string{ActionCopy, ActionRefresh, ActionAppend},
+		State:      state,
+	}
+}
+
 func Activate(single bool, identifier, action string, query string, args string, format uint8, conn net.Conn) {
 	switch action {
 	case ActionRefresh:
-		// Refresh rates and send async update with new timestamp
 		refreshRates()
 
-		// Re-evaluate to get updated result
 		result, err := evalNumr(query)
 		if err != nil {
 			slog.Error(Name, "eval after refresh", err)
 			return
 		}
 
-		text := result.Display
-		subtext := query
-		state := []string{result.Type}
-
-		// Separate numeric value from unit/currency
-		if result.Unit != "" && result.Value != "" {
-			text = fmt.Sprintf("%s %s", result.Value, result.Unit)
-		}
-
-		if result.Type == "currency" {
-			ratesInfo := getRatesUpdateTime()
-			if ratesInfo != "" {
-				subtext = ratesInfo
-			}
-		} else if result.Type == "unit" {
-			subtext = query
-		}
-
-		e := &pb.QueryResponse_Item{
-			Identifier: "numr-calc-result",
-			Text:       text,
-			Icon:       config.Icon,
-			Subtext:    subtext,
-			Provider:   Name,
-			Score:      1000,
-			Type:       pb.QueryResponse_REGULAR,
-			Actions:    []string{ActionCopy, ActionRefresh},
-			State:      state,
-		}
-
-		sendAsyncUpdate(format, query, conn, e)
+		sendAsyncUpdate(format, query, conn, buildResultItem(query, result))
 
 	case ActionCopy:
 		result, err := evalNumr(query)
@@ -339,6 +339,42 @@ func Activate(single bool, identifier, action string, query string, args string,
 			go func() {
 				cmd.Wait()
 			}()
+		}
+
+	case ActionAppend:
+		// Append expression to ~/.config/numr/default.numr
+		home, err := os.UserHomeDir()
+		if err != nil {
+			slog.Error(Name, "append home", err)
+			return
+		}
+
+		numrFile := filepath.Join(home, ".config", "numr", "default.numr")
+
+		// Create directory if needed
+		if err := os.MkdirAll(filepath.Dir(numrFile), 0755); err != nil {
+			slog.Error(Name, "append mkdir", err)
+			return
+		}
+
+		// Check if file needs a leading newline
+		prefix := ""
+		if data, err := os.ReadFile(numrFile); err == nil && len(data) > 0 {
+			if data[len(data)-1] != '\n' {
+				prefix = "\n"
+			}
+		}
+
+		// Append expression with newline
+		f, err := os.OpenFile(numrFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			slog.Error(Name, "append open", err)
+			return
+		}
+		defer f.Close()
+
+		if _, err := f.WriteString(prefix + query + "\n"); err != nil {
+			slog.Error(Name, "append write", err)
 		}
 
 	default:
@@ -381,50 +417,15 @@ func Query(conn net.Conn, query string, single bool, _ bool, format uint8) []*pb
 			return
 		}
 
-		// Format output based on type
-		text := result.Display
-		subtext := query // Show input expression as context
-		actions := []string{ActionCopy, ActionRefresh}
-		state := []string{result.Type} // CSS class for result type
-
-		// Separate numeric value from unit/currency
-		if result.Unit != "" && result.Value != "" {
-			text = fmt.Sprintf("%s %s", result.Value, result.Unit)
-		}
-
-		if result.Type == "currency" {
-			ratesInfo := getRatesUpdateTime()
-			if ratesInfo != "" {
-				subtext = ratesInfo
-			} else {
-				subtext = query
-			}
-		} else if result.Type == "unit" {
-			subtext = query // Show original expression since unit is now in result
-		} else if result.Type == "percentage" {
-			subtext = query
-		}
-
-		e := &pb.QueryResponse_Item{
-			Identifier: "numr-calc-result",
-			Text:       text,
-			Icon:       config.Icon,
-			Subtext:    subtext,
-			Provider:   Name,
-			Score:      1000,
-			Type:       pb.QueryResponse_REGULAR,
-			Actions:    actions,
-			State:      state,
-		}
+		item := buildResultItem(query, result)
 
 		// Update cache
 		cacheMu.Lock()
-		cachedItem = e
+		cachedItem = item
 		cachedQuery = query
 		cacheMu.Unlock()
 
-		// Send async update
-		sendAsyncUpdate(format, query, conn, e)
+		sendAsyncUpdate(format, query, conn, item)
 	}()
 
 	// Return cached result immediately if valid

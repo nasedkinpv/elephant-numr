@@ -9,10 +9,10 @@
     <property name="orientation">horizontal</property>
     <property name="spacing">0</property>
     <child>
-      <!-- Left column: Result -->
-      <object class="GtkBox" id="NumrResultColumn">
+      <!-- Left column: Expression -->
+      <object class="GtkBox" id="NumrExprColumn">
         <style>
-          <class name="numr-result-column"></class>
+          <class name="numr-expr-column"></class>
         </style>
         <property name="orientation">vertical</property>
         <property name="valign">center</property>
@@ -21,11 +21,12 @@
           <object class="GtkLabel" id="ItemText">
             <style>
               <class name="item-text"></class>
-              <class name="numr-result"></class>
+              <class name="numr-expr"></class>
             </style>
-            <property name="ellipsize">end</property>
             <property name="xalign">0</property>
             <property name="hexpand">true</property>
+            <property name="wrap">false</property>
+            <property name="lines">2</property>
           </object>
         </child>
       </object>
@@ -40,10 +41,10 @@
       </object>
     </child>
     <child>
-      <!-- Right column: Info -->
-      <object class="GtkBox" id="NumrInfoColumn">
+      <!-- Right column: Result -->
+      <object class="GtkBox" id="NumrResultColumn">
         <style>
-          <class name="numr-info-column"></class>
+          <class name="numr-result-column"></class>
         </style>
         <property name="orientation">vertical</property>
         <property name="valign">center</property>
@@ -52,10 +53,12 @@
           <object class="GtkLabel" id="ItemSubtext">
             <style>
               <class name="item-subtext"></class>
-              <class name="numr-info"></class>
+              <class name="numr-result"></class>
             </style>
             <property name="xalign">1</property>
             <property name="halign">end</property>
+            <property name="ellipsize">none</property>
+            <property name="wrap">false</property>
           </object>
         </child>
       </object>
