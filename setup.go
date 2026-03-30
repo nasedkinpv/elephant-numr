@@ -175,7 +175,7 @@ func Available() bool {
 	return true
 }
 
-func PrintDoc() {
+func PrintDoc(write bool) {
 	fmt.Println(readme)
 	fmt.Println()
 }
@@ -446,4 +446,21 @@ func HideFromProviderlist() bool {
 
 func State(provider string) *pb.ProviderStateResponse {
 	return &pb.ProviderStateResponse{}
+}
+
+func LoadConfig() {
+	config = &Config{
+		Config: common.Config{
+			Icon: "accessories-calculator",
+		},
+		RequireNumber: true,
+		MinChars:      2,
+		Command:       "wl-copy -n %VALUE%",
+	}
+
+	common.LoadConfig(Name, config)
+
+	if config.NamePretty != "" {
+		NamePretty = config.NamePretty
+	}
 }

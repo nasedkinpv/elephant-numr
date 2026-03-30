@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-VERSION="2.19.1"
+VERSION="2.20.2"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BUILD_DIR="$SCRIPT_DIR/build"
 SRC_DIR="$BUILD_DIR/elephant-${VERSION}"
