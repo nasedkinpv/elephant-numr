@@ -48,4 +48,4 @@ else
 fi
 
 echo "Walker configured for numr"
-echo "Restart Walker: systemctl --user restart elephant"
+echo "Restart Elephant: systemctl --user restart elephant"

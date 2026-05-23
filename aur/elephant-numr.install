@@ -1,15 +1,10 @@
 post_install() {
     echo ""
-    echo "==> Configuring Walker for numr..."
-
-    # Run configure scripts (they handle SUDO_USER detection)
-    /usr/share/elephant/numr/configure-walker.sh || true
-    /usr/share/elephant/numr/configure-theme.sh || true
-
-    echo ""
+    echo "==> Add 'numr' to ~/.config/walker/config.toml providers."
+    echo "==> Optional setup helpers:"
+    echo "==>   /usr/share/elephant/numr/configure-walker.sh"
+    echo "==>   /usr/share/elephant/numr/configure-theme.sh"
     echo "==> Restart elephant: systemctl --user restart elephant"
-    echo ""
-    echo "==> Backups saved to ~/.config/walker/*.backup.*"
     echo ""
 }
 

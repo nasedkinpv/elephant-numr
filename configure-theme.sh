@@ -13,10 +13,13 @@ fi
 WALKER_THEMES="$USER_HOME/.config/walker/themes"
 WALKER_CONFIG="$USER_HOME/.config/walker/config.toml"
 
-# Use system location if installed, otherwise dev location
+# Use installed location if available, otherwise dev location
 NUMR_SHARE="/usr/share/elephant/numr"
+USER_NUMR_SHARE="$USER_HOME/.local/share/elephant/numr"
 if [ -f "$NUMR_SHARE/numr.css" ]; then
     NUMR_FILES="$NUMR_SHARE"
+elif [ -f "$USER_NUMR_SHARE/numr.css" ]; then
+    NUMR_FILES="$USER_NUMR_SHARE"
 else
     NUMR_FILES="$SCRIPT_DIR"
 fi

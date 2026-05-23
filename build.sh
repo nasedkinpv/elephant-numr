@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-VERSION="2.20.2"
+VERSION="2.21.0"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BUILD_DIR="$SCRIPT_DIR/build"
 SRC_DIR="$BUILD_DIR/elephant-${VERSION}"
@@ -10,10 +10,12 @@ SRC_DIR="$BUILD_DIR/elephant-${VERSION}"
 if [ "$1" = "--user" ]; then
     INSTALL_BIN="$HOME/.local/bin"
     INSTALL_LIB="$HOME/.local/lib/elephant"
+    INSTALL_SHARE="$HOME/.local/share/elephant/numr"
     SUDO=""
 else
     INSTALL_BIN="/usr/bin"
     INSTALL_LIB="/usr/lib/elephant"
+    INSTALL_SHARE="/usr/share/elephant/numr"
     SUDO="sudo"
 fi
 
@@ -75,16 +77,17 @@ go build -buildvcs=false -buildmode=plugin -trimpath -o "$BUILD_DIR/plugins/numr
 echo ""
 echo "Installing..."
 $SUDO mkdir -p "$INSTALL_BIN" "$INSTALL_LIB"
-$SUDO cp "$SRC_DIR/cmd/elephant/elephant" "$INSTALL_BIN/"
+$SUDO cp "$SRC_DIR/cmd/elephant/elephant" "$INSTALL_BIN/elephant.new"
+$SUDO chmod 755 "$INSTALL_BIN/elephant.new"
+$SUDO mv -f "$INSTALL_BIN/elephant.new" "$INSTALL_BIN/elephant"
 $SUDO cp "$BUILD_DIR/plugins/"*.so "$INSTALL_LIB/"
 
-# Install numr theme files to system location
-NUMR_SHARE="/usr/share/elephant/numr"
-$SUDO mkdir -p "$NUMR_SHARE"
-$SUDO cp "$SCRIPT_DIR/numr.css" "$NUMR_SHARE/"
-$SUDO cp "$SCRIPT_DIR/item_numr.xml" "$NUMR_SHARE/"
-$SUDO chmod 644 "$NUMR_SHARE/numr.css" "$NUMR_SHARE/item_numr.xml"
-echo "Theme files: $NUMR_SHARE/"
+# Install numr theme files
+$SUDO mkdir -p "$INSTALL_SHARE"
+$SUDO cp "$SCRIPT_DIR/numr.css" "$INSTALL_SHARE/"
+$SUDO cp "$SCRIPT_DIR/item_numr.xml" "$INSTALL_SHARE/"
+$SUDO chmod 644 "$INSTALL_SHARE/numr.css" "$INSTALL_SHARE/item_numr.xml"
+echo "Theme files: $INSTALL_SHARE/"
 
 echo ""
 echo "=== Done ==="
@@ -104,14 +107,22 @@ sleep 1
 
 echo "Ready! Press SUPER+SPACE to test."
 
+run_user_script() {
+    if [ -n "$SUDO_USER" ]; then
+        sudo -u "$SUDO_USER" "$@"
+    else
+        "$@"
+    fi
+}
+
 # Configure Walker for numr actions
 echo ""
 echo "Configuring Walker..."
-"$SCRIPT_DIR/configure-walker.sh"
+run_user_script "$SCRIPT_DIR/configure-walker.sh"
 
 # Configure Walker theme
 echo ""
-"$SCRIPT_DIR/configure-theme.sh"
+run_user_script "$SCRIPT_DIR/configure-theme.sh"
 
 # Sync AUR package sources (as user, not root)
 if [ -d "$SCRIPT_DIR/aur" ]; then

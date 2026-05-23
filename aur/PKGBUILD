@@ -3,10 +3,10 @@
 # When elephant updates, this package must be rebuilt with matching version
 
 pkgname=elephant-numr
-pkgver=2.19.1
+pkgver=2.21.0
 pkgrel=1
-pkgdesc='numr calculator provider for elephant (Walker launcher)'
-url='https://github.com/nasedkinpv/numr'
+pkgdesc='numr calculator provider for Elephant (Walker launcher)'
+url='https://github.com/nasedkinpv/elephant-numr'
 arch=('x86_64' 'aarch64')
 license=('MIT')
 depends=("elephant=${pkgver}" 'numr')

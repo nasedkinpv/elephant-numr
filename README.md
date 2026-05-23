@@ -1,15 +1,20 @@
 # elephant-numr
 
-[numr](https://github.com/nasedkinpv/numr) calculator provider for [Walker/Elephant](https://github.com/abenz1267/walker) launcher.
+[numr](https://github.com/nasedkinpv/numr) calculator provider for the [Walker](https://github.com/abenz1267/walker) launcher with the Elephant backend.
 
 ![screenshot](screenshot.png)
 
-## Prerequisites
+## Requirements
 
-- [Walker](https://github.com/abenz1267/walker) with Elephant backend
-- [numr](https://github.com/nasedkinpv/numr) (`numr-cli` must be in PATH)
+- Walker with Elephant backend
+- `numr-cli` in `PATH`
+- Go, `curl`, and `tar` for manual builds
+
+Elephant providers are Go plugins, so `numr.so` must be built against the same Elephant version as the running `elephant` binary. This repository pins that version in `build.sh` and `aur/PKGBUILD`.
 
 ## Installation
+
+### Manual
 
 ```bash
 git clone https://github.com/nasedkinpv/elephant-numr
@@ -17,26 +22,31 @@ cd elephant-numr
 sudo ./build.sh
 ```
 
-The build script will:
-1. Build the numr plugin for Elephant
-2. Install to `/usr/lib/elephant/`
-3. Configure Walker keybindings
-4. Set up theme integration
+The script builds Elephant, the standard providers, and the Numr provider together, then installs them to `/usr/bin/elephant` and `/usr/lib/elephant/`.
 
 ## Setup
 
-After installation, add `numr` to your Walker config:
+Add `numr` to your Walker providers:
 
-**~/.config/walker/config.toml**
 ```toml
 [providers]
 default = [
   "desktopapplications",
-  "numr",  # add this
+  "websearch",
+  "numr",
 ]
 ```
 
-Restart Walker:
+Optional prefix:
+
+```toml
+[[providers.prefixes]]
+prefix = "+"
+provider = "numr"
+```
+
+Restart Elephant:
+
 ```bash
 systemctl --user restart elephant
 ```
@@ -53,9 +63,14 @@ Press `Alt+J` for actions menu.
 
 ## Configuration (optional)
 
-**~/.config/elephant/numr.toml**
+`~/.config/elephant/numr.toml`
+
 ```toml
 min_chars = 2        # minimum query length
 require_number = true # require digit in query
 command = "wl-copy -n %VALUE%"  # copy command
 ```
+
+## Updating
+
+When Elephant updates, update the pinned version in `build.sh` and `aur/PKGBUILD`, rebuild, and restart Elephant. A stale plugin will fail to load.
